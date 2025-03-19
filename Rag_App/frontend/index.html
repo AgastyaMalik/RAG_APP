@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAG App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    header {
+      background-color: #6200ea;
+      color: #fff;
+      padding: 1em 0;
+      text-align: center;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2em auto;
+      background: #fff;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2 {
+      color: #6200ea;
+    }
+
+    form {
+      margin-bottom: 2em;
+    }
+
+    input[type="file"], input[type="text"] {
+      width: 100%;
+      padding: 0.5em;
+      margin: 1em 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #6200ea;
+      color: #fff;
+      border: none;
+      padding: 0.7em 1.5em;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    button:hover {
+      background-color: #4500b0;
+    }
+
+    .response-box {
+      background: #f9f9f9;
+      padding: 1em;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-top: 1em;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2em;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RAG App Interface</h1>
+  </header>
+
+  <main>
+    <h2>Embed a File</h2>
+    <form id="embedForm">
+      <input type="file" name="file" id="fileInput" accept=".pdf" required />
+      <button type="submit">Embed File</button>
+    </form>
+    <div id="embedResponse" class="response-box"></div>
+
+    <h2>Ask a Question</h2>
+    <form id="queryForm">
+      <input type="text" name="query" id="queryInput" placeholder="Type your question here" required />
+      <button type="submit">Submit Query</button>
+    </form>
+    <div id="queryResponse" class="response-box"></div>
+  </main>
+
+  <footer>
+    <p>Powered by your RAG Application</p>
+  </footer>
+
+  <script>
+    document.getElementById('embedForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('fileInput');
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      const embedResponseBox = document.getElementById('embedResponse');
+      embedResponseBox.textContent = "Uploading file...";
+      embedResponseBox.style.color = "black";
+
+      try {
+        const response = await fetch('http://127.0.0.1:8080/embed', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+        embedResponseBox.textContent = JSON.stringify(result);
+        embedResponseBox.style.color = "green";
+      } catch (error) {
+        embedResponseBox.textContent = "Error uploading file.";
+        embedResponseBox.style.color = "red";
+      }
+    });
+
+    document.getElementById('queryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const queryInput = document.getElementById('queryInput').value;
+
+      const queryResponseBox = document.getElementById('queryResponse');
+      queryResponseBox.textContent = "Submitting query...";
+      queryResponseBox.style.color = "black";
+
+      try {
+        const response = await fetch('http://127.0.0.1:8080/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: queryInput }),
+        });
+
+        const result = await response.json();
+        queryResponseBox.textContent = JSON.stringify(result);
+        queryResponseBox.style.color = "green";
+      } catch (error) {
+        queryResponseBox.textContent = "Error processing query.";
+        queryResponseBox.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>
